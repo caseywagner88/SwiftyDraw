@@ -80,15 +80,12 @@ open class SwiftyDrawView: UIView {
     /// Determines whether responde to Apple Pencil interactions, like the Double tap for Apple Pencil 2 to switch tools.
     public var isPencilInteractive : Bool = true {
         didSet {
-            if #available(iOS 12.1, *) {
-                pencilInteraction.isEnabled  = isPencilInteractive
-            }
+            pencilInteraction.isEnabled  = isPencilInteractive
         }
     }
     /// Public SwiftyDrawView delegate
     @IBOutlet public weak var delegate: SwiftyDrawViewDelegate?
     
-    @available(iOS 9.1, *)
     public enum TouchType: Equatable, CaseIterable {
         case finger, pencil
         
@@ -100,9 +97,7 @@ open class SwiftyDrawView: UIView {
                 return [.pencil, .stylus  ]
             }
         }
-    }
     /// Determines which touch types are allowed to draw; default: `[.finger, .pencil]` (all)
-    @available(iOS 9.1, *)
     public lazy var allowedTouchTypes: [TouchType] = [.finger, .pencil]
     
     public  var drawItems: [DrawItem] = []
@@ -113,7 +108,6 @@ open class SwiftyDrawView: UIView {
     private var previousPreviousPoint: CGPoint = .zero
     
     // For pencil interactions
-    @available(iOS 12.1, *)
     lazy private var pencilInteraction = UIPencilInteraction()
     
     /// Save the previous brush for Apple Pencil interaction Switch to previous tool
@@ -138,10 +132,8 @@ open class SwiftyDrawView: UIView {
         super.init(frame: frame)
         self.backgroundColor = .clear
         // receive pencil interaction if supported
-        if #available(iOS 12.1, *) {
-            pencilInteraction.delegate = self
-            self.addInteraction(pencilInteraction)
-        }
+        pencilInteraction.delegate = self
+        self.addInteraction(pencilInteraction)
     }
     
     /// Public init(coder:) implementation
@@ -149,10 +141,8 @@ open class SwiftyDrawView: UIView {
         super.init(coder: aDecoder)
         self.backgroundColor = .clear
         //Receive pencil interaction if supported
-        if #available(iOS 12.1, *) {
-            pencilInteraction.delegate = self
-            self.addInteraction(pencilInteraction)
-        }
+        pencilInteraction.delegate = self
+        self.addInteraction(pencilInteraction)
     }
     
     /// Overriding draw(rect:) to stroke paths
@@ -182,9 +172,7 @@ open class SwiftyDrawView: UIView {
     /// touchesBegan implementation to capture strokes
     override open func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard isEnabled, let touch = touches.first else { return }
-        if #available(iOS 9.1, *) {
-            guard allowedTouchTypes.flatMap({ $0.uiTouchTypes }).contains(touch.type) else { return }
-        }
+        guard allowedTouchTypes.flatMap({ $0.uiTouchTypes }).contains(touch.type) else { return }
         guard delegate?.swiftyDraw(shouldBeginDrawingIn: self, using: touch) ?? true else { return }
         delegate?.swiftyDraw(didBeginDrawingIn: self, using: touch)
         
@@ -198,9 +186,7 @@ open class SwiftyDrawView: UIView {
     /// touchesMoves implementation to capture strokes
     override open func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard isEnabled, let touch = touches.first else { return }
-        if #available(iOS 9.1, *) {
-            guard allowedTouchTypes.flatMap({ $0.uiTouchTypes }).contains(touch.type) else { return }
-        }
+        guard allowedTouchTypes.flatMap({ $0.uiTouchTypes }).contains(touch.type) else { return }
         delegate?.swiftyDraw(isDrawingIn: self, using: touch)
         
         updateTouchPoints(for: touch, in: self)
@@ -385,7 +371,6 @@ extension Collection {
     }
 }
 
-@available(iOS 12.1, *)
 extension SwiftyDrawView : UIPencilInteractionDelegate{
     public func pencilInteractionDidTap(_ interaction: UIPencilInteraction) {
         let preference = UIPencilInteraction.preferredTapAction
@@ -400,7 +385,6 @@ extension SwiftyDrawView : UIPencilInteractionDelegate{
             self.brush = self.previousBrush
         }
     }
-}
 
 extension SwiftyDrawView.DrawItem: Codable {
     public init(from decoder: Decoder) throws {
@@ -419,11 +403,7 @@ extension SwiftyDrawView.DrawItem: Codable {
         
         let uiBezierPath = UIBezierPath(cgPath: path)
         var pathData: Data?
-        if #available(iOS 11.0, *) {
-            pathData = try NSKeyedArchiver.archivedData(withRootObject: uiBezierPath, requiringSecureCoding: false)
-        } else {
-            pathData = NSKeyedArchiver.archivedData(withRootObject: uiBezierPath)
-        }
+        pathData = try NSKeyedArchiver.archivedData(withRootObject: uiBezierPath, requiringSecureCoding: false)
         try container.encode(pathData!, forKey: .path)
         
         try container.encode(brush, forKey: .brush)
