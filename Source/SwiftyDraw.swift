@@ -97,6 +97,7 @@ open class SwiftyDrawView: UIView {
                 return [.pencil, .stylus  ]
             }
         }
+    }
     /// Determines which touch types are allowed to draw; default: `[.finger, .pencil]` (all)
     public lazy var allowedTouchTypes: [TouchType] = [.finger, .pencil]
     
@@ -385,6 +386,7 @@ extension SwiftyDrawView : UIPencilInteractionDelegate{
             self.brush = self.previousBrush
         }
     }
+}
 
 extension SwiftyDrawView.DrawItem: Codable {
     public init(from decoder: Decoder) throws {
